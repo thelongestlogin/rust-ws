@@ -1,4 +1,4 @@
-use simple_websockets::{Event, Responder};
+use simple_websockets::{Event, Responder, Message};
 use std::collections::HashMap;
 
 fn main() {
@@ -22,11 +22,16 @@ fn main() {
             },
             Event::Message(client_id, message) => {
                 println!("Received a message from client #{}: {:?}", client_id, message);
-                // retrieve this client's `Responder`:
-                let responder = clients.get(&client_id).unwrap();
-                // echo the message back:
-                responder.send(message);
+                resend_messages(&clients, &message); 
             },
         }
     }
+    
+    fn resend_messages(clients: &HashMap<u64, Responder>, value: &Message) { 
+        for client in clients.iter() {
+            let client = client.1;
+            let message = value.clone();
+            client.send(message);
+        }
+    } 
 }
